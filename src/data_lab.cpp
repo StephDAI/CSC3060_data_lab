@@ -2,6 +2,7 @@
 #include <cstdint>
 
 namespace data_lab {
+
 uint32_t helper_add(uint32_t a, uint32_t b, bool carry = 0){
     uint32_t sum = 0;
     for(int i = 0;i<32;i++){
@@ -13,6 +14,7 @@ uint32_t helper_add(uint32_t a, uint32_t b, bool carry = 0){
     } 
     return sum;
 }
+
 int32_t add(int32_t a, int32_t b) {
     uint32_t ua = static_cast<uint32_t>(a);
     uint32_t ub = static_cast<uint32_t>(b);
@@ -30,10 +32,14 @@ int32_t subtract(int32_t a, int32_t b) {
 int32_t multiply(int32_t a, int32_t b) {
     uint32_t ua = static_cast<uint32_t>(a);
     uint32_t ub = static_cast<uint32_t>(b);
-    uint64_t ans = 0;
+    uint32_t ans = 0;
     for(int i = 0;i<32;i++){
-        if((ub & (1 << i)) != 0) add(ua, )
-    }   
+        if((ub & (1 << i)) != 0){
+            uint64_t tmp = static_cast<uint64_t>(ua) << i;
+            ans = helper_add(ans, static_cast<uint32_t>(tmp));
+        }
+    }
+    return static_cast<int32_t>(ans);
 }
 
 int32_t divide(int32_t a, int32_t b) {
