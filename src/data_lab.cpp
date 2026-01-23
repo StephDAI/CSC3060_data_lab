@@ -3,6 +3,10 @@
 
 namespace data_lab {
 
+bool less_than_zero(int32_t x) {
+    return (x >> 31) & 1;
+}
+
 uint32_t helper_add(uint32_t a, uint32_t b, bool carry = 0){
     uint32_t sum = 0;
     
@@ -233,13 +237,13 @@ uint32_t helper_add(uint32_t a, uint32_t b, bool carry = 0){
     return sum;
 }
 
-uint32_t helper_add_loop(uint32_t a, uint32_t b, bool carry = 0){
-    uint32_t sum = 0;
-    for(int i = 0;i<32;i++){
-        bool ai = a & (1 << i);
-        bool bi = b & (1 << i);
+uint64_t helper_add(uint64_t a, uint64_t b, bool carry = 0){ // uint64_t version
+    uint64_t sum = 0;
+    for(int i = 0;i<64;i++){
+        bool ai = a & (1ULL << i);
+        bool bi = b & (1ULL << i);
         bool si = ai ^ bi ^ carry; // sum bit at position i
-        sum |= static_cast<uint32_t>(si) << i; // set the i-th bit of sum
+        sum |= static_cast<uint64_t>(si) << i; // set the i-th bit of sum
         carry = (ai & bi) | (carry & (ai ^ bi)); // update carry
     } 
     return sum;
@@ -266,14 +270,30 @@ int32_t multiply(int32_t a, int32_t b) {
     for(int i = 0;i<32;i++){
         if(ub & (1 << i)){
             uint64_t tmp = static_cast<uint64_t>(ua) << i;
-            ans = helper_add_loop(ans, static_cast<uint32_t>(tmp));
+            ans = helper_add(ans, static_cast<uint32_t>(tmp));
         }
     }
     return static_cast<int32_t>(ans);
 }
 
 int32_t divide(int32_t a, int32_t b) {
-    return a / b;
+    bool inverse = false;
+    if(less_than_zero(a) ^ less_than_zero(b)) inverse = true;
+    if(less_than_zero(a)) a = add(~a, 1);
+    if(less_than_zero(b)) b = add(~b, 1);
+    uint64_t divisor = static_cast<uint64_t>(b) << 31;
+    uint64_t remainder = static_cast<uint64_t>(a);
+    uint32_t quotient = 0;
+    for(int _ = 1; _ <= 32; _++){
+        quotient <<= 1;
+        if(!((helper_add(remainder, ~divisor, 1) >> 63) & 1)) {
+            remainder = helper_add(remainder, ~divisor, 1);
+            quotient |= 1;
+        }
+        divisor >>= 1;
+    }
+    if(inverse) quotient = helper_add(~quotient, 1);
+    return static_cast<int32_t>(quotient);
 }
 
 int32_t modulo(int32_t a, int32_t b) {
