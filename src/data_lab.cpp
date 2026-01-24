@@ -297,7 +297,22 @@ int32_t divide(int32_t a, int32_t b) {
 }
 
 int32_t modulo(int32_t a, int32_t b) {
-    return subtract(a, multiply(b, divide(a, b)));
+    bool inverse = false;
+    if(less_than_zero(a)) {a = add(~a, 1); inverse = true;}
+    if(less_than_zero(b)) b = add(~b, 1);
+    uint64_t divisor = static_cast<uint64_t>(b) << 31;
+    uint64_t remainder = static_cast<uint64_t>(a);
+    uint32_t quotient = 0;
+    for(int _ = 1; _ <= 32; _++){
+        quotient <<= 1;
+        if(!((helper_add(remainder, ~divisor, 1) >> 63) & 1)) {
+            remainder = helper_add(remainder, ~divisor, 1);
+            quotient |= 1;
+        }
+        divisor >>= 1;
+    }
+    if(inverse) remainder = helper_add(~remainder, 1);
+    return static_cast<int32_t>(remainder);
 }
 
 }  // namespace data_lab
