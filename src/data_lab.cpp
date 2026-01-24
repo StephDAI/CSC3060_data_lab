@@ -297,7 +297,7 @@ int32_t divide(int32_t a, int32_t b) {
 }
 
 int32_t modulo(int32_t a, int32_t b) {
-    return a % b;
+    return subtract(a, multiply(b, divide(a, b)));
 }
 
 }  // namespace data_lab
